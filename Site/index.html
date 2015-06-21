@@ -18,13 +18,13 @@
 		<header>
 			<div class="wrapper">
 				<h1>
-					<a href="index.html" id="logo">Air Lines</a><span id="slogan">International Crashes</span>
+					<a href="/" id="logo">Air Lines</a><span id="slogan">International Crashes</span>
 				</h1>
 				<div class="right">
 					<nav>
 						<ul id="top_nav">
-							<li><a href="index.html"><img src="static/images/img1.gif" alt=""></a></li>
-							<li><a href="index-4.html"><img src="static/images/img2.gif" alt=""></a></li>
+							<li><a href="/"><img src="static/images/img1.gif" alt=""></a></li>
+							<li><a href="/"><img src="static/images/img2.gif" alt=""></a></li>
 							<li class="bg_none"><a href="#"><img src="static/images/img3.gif" alt=""></a></li>
 						</ul>
 					</nav>
@@ -77,6 +77,7 @@
 			  <thead>
 				<th>Date</th>
 				<th>Time</th>
+				<th>Operator</th>
 				<th>Route</th>
 				<th>Type</th>
 				<th>Location</th>
@@ -130,7 +131,10 @@ $(function () {
         title: {
             text: 'Air crashes by location over time'
         },
-        series: [{}]
+        series: [{
+			name: 'Location',
+			data: []
+		}]
     };
 
 	var pieOptions = {
