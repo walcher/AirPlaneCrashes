@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title></title>
+<meta charset="utf-8">
+<link rel="stylesheet" href="static/css/reset.css" type="text/css" media="all">
+<link rel="stylesheet" href="static/css/layout.css" type="text/css" media="all">
+<link rel="stylesheet" href="static/css/style.css" type="text/css" media="all">
+<link rel="stylesheet" href="static/css/jquery.dynatable.css" type="text/css" media="all">
+<link rel="stylesheet" href="static/css/bootstrap.min.css" type="text/css" media="all">
+
+<script type="text/javascript" src="static/js/jquery-1.11.3.min.js" ></script>
+</head>
+<body id="page1">
+<div class="body1">
+	<div class="main">
+<!-- header -->
+		<header>
+			<div class="wrapper">
+				<h1>
+					<a href="index.html" id="logo">Air Lines</a><span id="slogan">International Crashes</span>
+				</h1>
+				<div class="right">
+					<nav>
+						<ul id="top_nav">
+							<li><a href="index.html"><img src="static/images/img1.gif" alt=""></a></li>
+							<li><a href="index-4.html"><img src="static/images/img2.gif" alt=""></a></li>
+							<li class="bg_none"><a href="#"><img src="static/images/img3.gif" alt=""></a></li>
+						</ul>
+					</nav>
+					<nav>
+						<ul id="menu">
+							<li id="menu_active"><a href="/">Bubble chart</a></li>
+							<!--"<li><a href="index-1.html">Our Aircraft</a></li>
+							<li><a href="index-2.html">Safety</a></li>
+							<li><a href="index-3.html">Charters</a></li>
+							<li><a href="index-4.html">Contacts</a></li>-->
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</header>
+	</div>
+</div><!-- 
+<div class="main">
+	<div id="banner">
+		<div class="text1">
+			
+		</div>
+	</div>
+</div>-->
+<!-- / header -->
+<div class="main">
+<!-- content -->
+	<section id="content">
+		<!--<article class="col1">
+			<div class="pad_1">
+				<h2>Search</h2>
+				<div id="form_1">
+					<div class="wrapper">
+						Key word:
+						<input id="key_word" type="text" class="input input1" value="Enter Key Word" onblur="if(this.value=='') this.value='Enter Key Word'" onFocus="if(this.value =='Enter Key Word' ) this.value=''" />
+						
+					</div>
+					<div class="wrapper">
+						<button id="buscar2" class="button2">go!</button>
+						
+					</div>
+				</div>
+				
+			</div>
+		</article>-->
+		<article class="pad_left1">
+			<div id="container" style=""></div>
+			<div id="pieContainer" style=""></div>
+			<table id="detail-table" class="table table-bordered">
+			  <thead>
+				<th>Date</th>
+				<th>Time</th>
+				<th>Route</th>
+				<th>Type</th>
+				<th>Location</th>
+				<th>Registration</th>
+				<th>Fatalities</th>
+				<th>Ground</th>
+				<th>Aboard</th>
+				<th>Cn/in</th>
+				<th>Summary</th>
+			  </thead>
+			  <tbody>
+			  </tbody>
+			</table>
+		</article>
+	</section>
+<!-- / content -->
+</div>
+
+<script type="text/javascript">
+$(function () {
+	$('#detail-table').hide();
+	var options = {
+
+        chart: {
+			renderTo: 'container',
+            type: 'bubble',
+            zoomType: 'xy',
+			events: {
+				click: function (event) {
+					
+				}
+			}
+        },
+		plotOptions: {
+            series: {
+                point: {
+                    events: {
+                        click: function(event) {                        
+							
+							detail(this.Location)
+                        }
+                    }
+                }
+            }
+        },
+		tooltip: {
+				formatter: function () {
+					return 'Location: <b>' + this.point.Location + '</b><br/> Year:' + this.x + '<br/> Hour:' + this.y + '<br/> Fatalities:' +this.point.z;
+				}
+			},
+        title: {
+            text: 'Air crashes by location over time'
+        },
+        series: [{}]
+    };
+
+	var pieOptions = {
+        chart: {
+			renderTo: 'pieContainer',
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        title: {
+            text: 'Operator airplane crashes share'
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                    style: {
+                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                    }
+                }
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Air crash share',
+            data: [["Trans Canada Air Lines",100]]
+        }]
+    }
+		
+	$.getJSON('bubbledata', function(data) {
+        options.series[0].data = data.data;
+        var chart = new Highcharts.Chart(options);
+    });
+	
+	function detail(location){		
+			$.getJSON('bubbledetaileddata?rnd='+ Math.random() + '&location=' + encodeURIComponent(location),function(data){
+				pieOptions.series[0].data = parsePieData(data.data);
+				pieOptions.series[0].name = "Air crash share at " + location;
+				pieOptions.title.text = "Operator airplane crashes share at " + location;
+				var chart = new Highcharts.Chart(pieOptions);
+				
+				$('html, body').animate({
+					scrollTop: $("#pieContainer").offset().top
+				}, 2000);
+				
+				var dynatable = $('#detail-table').dynatable({ 
+									dataset: { records: data.complete } }, 
+									{ features: { pushState: false }}).data("dynatable");
+				dynatable.settings.dataset.originalRecords =  data.complete;
+				dynatable.process();  
+				
+				$('#detail-table').show();
+			}).done(function() {
+				//console.log( "success" );
+			  })
+			  .fail(function(jqxhr, textStatus, error) {
+				var err = textStatus + ", " + error;
+				console.log( "Request Failed: " + err );
+			  })
+			  .always(function() {
+				//console.log( "complete" );
+			  });
+			
+			
+			
+			  
+			
+	}
+	
+	function parsePieData(d){
+		
+		var name = Array();
+		var data = Array();
+		var dataArrayFinal = Array();
+		for(i=0;i<d.length;i++) { 
+		   name[i] = d[i].Operator.replace(/\W/g, ''); 
+		   data[i] = d[i].y;  
+		}
+
+		for(j=0;j<name.length;j++) { 
+		   var temp = new Array(name[j],data[j]); 
+		   dataArrayFinal[j] = temp;     
+		}
+		//console.log(JSON.stringify(dataArrayFinal))
+		return dataArrayFinal;
+	}
+	
+});
+		</script>
+
+<script type="text/javascript" src="static/js/d3.min.js"></script>
+<script type="text/javascript" src="static/js/airplane_crash.js"></script>
+<script type="text/javascript" src="static/js/highcharts.js"></script>
+<script type="text/javascript" src="static/js/highcharts-more.js"></script>
+<script type="text/javascript" src="static/js/modules/exporting.js"></script>
+<script type="text/javascript" src="static/js/jquery.dynatable.js"></script>
+</body>
+</html>
