@@ -161,6 +161,17 @@ $(function () {
                         color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
                     }
                 }
+            },
+			series: {
+                point: {
+                    events: {	
+                        click: function(event) {      
+
+							$('#dynatable-query-search-detail-table').val(this.name.replace(/([a-z])([A-Z])/g, '$1 $2')).change()
+							console.log(this)
+                        }
+                    }
+                }
             }
         },
         series: [{
